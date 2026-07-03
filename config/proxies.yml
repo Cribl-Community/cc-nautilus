@@ -1,0 +1,325 @@
+# External API declarations for Nautilus — CTI Artifact Search
+# Cribl Cloud routes these at runtime so the browser never hits external APIs directly.
+
+api.apivoid.com:
+  paths:
+    allowlist:
+      - /v2/
+
+cve.circl.lu:
+  paths:
+    allowlist:
+      - /api/
+
+services.nvd.nist.gov:
+  paths:
+    allowlist:
+      - /rest/json/cves/
+
+urlhaus-api.abuse.ch:
+  paths:
+    allowlist:
+      - /api/v1/
+
+mb-api.abuse.ch:
+  paths:
+    allowlist:
+      - /api/v1/
+
+threatfox-api.abuse.ch:
+  paths:
+    allowlist:
+      - /api/v1/
+
+apibl.spamhaus.net:
+  paths:
+    allowlist:
+      - /lookup/v2/
+
+api.greynoise.io:
+  paths:
+    allowlist:
+      - /v3/
+
+www.virustotal.com:
+  paths:
+    allowlist:
+      - /api/v3/
+
+internetdb.shodan.io:
+  paths:
+    allowlist:
+      - /
+
+api.shodan.io:
+  paths:
+    allowlist:
+      - /shodan/
+      - /dns/
+
+api.abuseipdb.com:
+  paths:
+    allowlist:
+      - /api/v2/
+
+search.censys.io:
+  paths:
+    allowlist:
+      - /api/v2/
+
+geoip.maxmind.com:
+  paths:
+    allowlist:
+      - /geoip/v2.1/
+
+geolite.info:
+  paths:
+    allowlist:
+      - /geoip/v2.1/
+
+rdap.org:
+  paths:
+    allowlist:
+      - /domain/
+      - /ip/
+
+rdap.arin.net:
+  paths:
+    allowlist:
+      - /registry/
+
+rdap.ripe.net:
+  paths:
+    allowlist:
+      - /
+
+rdap.db.ripe.net:
+  paths:
+    allowlist:
+      - /
+
+rdap.apnic.net:
+  paths:
+    allowlist:
+      - /
+
+rdap.lacnic.net:
+  paths:
+    allowlist:
+      - /rdap/
+
+rdap.afrinic.net:
+  paths:
+    allowlist:
+      - /
+
+hybrid-analysis.com:
+  paths:
+    allowlist:
+      - /api/v2/
+  headers:
+    allowlist:
+      - api-key
+      - content-type
+      - accept
+      - user-agent
+
+www.ipqualityscore.com:
+  paths:
+    allowlist:
+      - /api/json/ip/
+      - /api/json/url/
+
+malshare.com:
+  paths:
+    allowlist:
+      - /api.php
+
+a.tile.openstreetmap.org:
+  paths:
+    allowlist:
+      - /
+
+b.tile.openstreetmap.org:
+  paths:
+    allowlist:
+      - /
+
+c.tile.openstreetmap.org:
+  paths:
+    allowlist:
+      - /
+
+otx.alienvault.com:
+  paths:
+    allowlist:
+      - /api/v1/
+  headers:
+    allowlist:
+      - x-otx-api-key
+
+ipinfo.io:
+  paths:
+    allowlist:
+      - /
+
+pulsedive.com:
+  paths:
+    allowlist:
+      - /api/
+
+attack-taxii.mitre.org:
+  paths:
+    allowlist:
+      - /api/v21/
+  headers:
+    allowlist:
+      - accept
+
+api.recordedfuture.com:
+  paths:
+    allowlist:
+      - /v2/
+  headers:
+    allowlist:
+      - x-rftoken
+
+# ── Threat Feed sources ──────────────────────────────────────────────
+# Auth headers allowlisted per-host so paid feeds can pass API keys through
+# the Cribl service-worker proxy. Free feeds omit the headers block.
+
+feodotracker.abuse.ch:
+  paths:
+    allowlist:
+      - /downloads/
+
+threatfox.abuse.ch:
+  paths:
+    allowlist:
+      - /export/
+
+urlhaus.abuse.ch:
+  paths:
+    allowlist:
+      - /downloads/
+
+www.spamhaus.org:
+  paths:
+    allowlist:
+      - /drop/
+      - /zen/
+      - /dbl/
+  headers:
+    allowlist:
+      - authorization
+      - x-api-key
+
+rules.emergingthreats.net:
+  paths:
+    allowlist:
+      - /blockrules/
+      - /open/
+  headers:
+    allowlist:
+      - authorization
+      - x-api-key
+
+www.cisa.gov:
+  paths:
+    allowlist:
+      - /sites/default/files/
+
+raw.githubusercontent.com:
+  paths:
+    allowlist:
+      - /
+
+check.torproject.org:
+  paths:
+    allowlist:
+      - /
+
+lists.blocklist.de:
+  paths:
+    allowlist:
+      - /lists/
+
+data.phishtank.com:
+  paths:
+    allowlist:
+      - /data/
+  headers:
+    allowlist:
+      - app-key
+
+bazaar.abuse.ch:
+  paths:
+    allowlist:
+      - /export/
+
+# ── Generic auth-capable feed hosts (custom feeds added by users) ─────
+# Any domain added via "Add Custom Feed" with header/queryparam auth will
+# need its host added here. The allowlist below covers common SaaS CTI hosts.
+
+feeds.recordedfuture.com:
+  paths:
+    allowlist:
+      - /
+  headers:
+    allowlist:
+      - x-rftoken
+      - authorization
+
+intelapi.emergingthreats.net:
+  paths:
+    allowlist:
+      - /
+  headers:
+    allowlist:
+      - authorization
+      - x-api-key
+
+api.crowdstrike.com:
+  paths:
+    allowlist:
+      - /intel/
+  headers:
+    allowlist:
+      - authorization
+
+api.mimecast.com:
+  paths:
+    allowlist:
+      - /api/
+  headers:
+    allowlist:
+      - authorization
+      - x-mc-req-id
+      - x-mc-app-id
+      - x-mc-date
+
+api.intel471.com:
+  paths:
+    allowlist:
+      - /v2/
+  headers:
+    allowlist:
+      - authorization
+
+# ── Detection rule sources ────────────────────────────────────────────
+
+api.github.com:
+  paths:
+    allowlist:
+      - /search/
+      - /repos/
+  headers:
+    allowlist:
+      - authorization
+      - x-github-api-version
+      - accept
+
+yaraify-api.abuse.ch:
+  paths:
+    allowlist:
+      - /api/
