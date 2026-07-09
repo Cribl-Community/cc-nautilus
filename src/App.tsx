@@ -1032,6 +1032,133 @@ function cacheSet(query: string, entry: CacheEntry) {
   if (resultCache.size > CACHE_MAX) resultCache.delete(resultCache.keys().next().value!);
 }
 
+// ── Passive DNS ────────────────────────────────────────────────────
+
+interface PdnsRecord {
+  rrname:     string;
+  rrtype:     string;
+  rdata:      string | string[];
+  time_first: number | null;
+  time_last:  number | null;
+  count?:     number;
+  source:     'circl' | 'farsight';
+}
+
+function PdnsPanel({ records, loading, artifactType, onSearch }: {
+  records: PdnsRecord[];
+  loading: boolean;
+  query: string;
+  artifactType: ArtifactType;
+  onSearch: (q: string) => void;
+}) {
+  const [sortCol, setSortCol] = useState<'time_last' | 'time_first' | 'count'>('time_last');
+  const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc');
+  const [filter, setFilter] = useState('');
+
+  if (loading) return <div className="pdns-empty">Querying passive DNS…</div>;
+  if (!records.length) return <div className="pdns-empty">No passive DNS records found for this indicator.</div>;
+
+  function toggleSort(col: typeof sortCol) {
+    if (sortCol === col) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
+    else { setSortCol(col); setSortDir('desc'); }
+  }
+
+  const fmt = (ts: number | null) => {
+    if (!ts) return '—';
+    return new Date(ts * 1000).toISOString().slice(0, 10);
+  };
+
+  const rdataStr = (r: PdnsRecord) =>
+    Array.isArray(r.rdata) ? r.rdata.join(', ') : r.rdata;
+
+  const filterLow = filter.toLowerCase();
+  const visible = records
+    .filter(r => {
+      if (!filter) return true;
+      return r.rrname.toLowerCase().includes(filterLow)
+        || rdataStr(r).toLowerCase().includes(filterLow)
+        || r.rrtype.toLowerCase().includes(filterLow);
+    })
+    .sort((a, b) => {
+      const av = sortCol === 'count' ? (a.count ?? 0) : (a[sortCol] ?? 0);
+      const bv = sortCol === 'count' ? (b.count ?? 0) : (b[sortCol] ?? 0);
+      return sortDir === 'desc' ? (bv as number) - (av as number) : (av as number) - (bv as number);
+    });
+
+  const circlCount   = records.filter(r => r.source === 'circl').length;
+  const farsightCount = records.filter(r => r.source === 'farsight').length;
+
+  const pivotValue = (r: PdnsRecord) =>
+    artifactType === 'ip'
+      ? (Array.isArray(r.rdata) ? r.rdata : [r.rdata]).find(v => /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(v) && !/^\d+\.\d+\.\d+\.\d+$/.test(v)) ?? null
+      : /^\d+\.\d+\.\d+\.\d+$/.test(r.rrname) || /^\d+\.\d+\.\d+\.\d+$/.test(rdataStr(r))
+        ? rdataStr(r).split(',')[0]?.trim() ?? null
+        : r.rrname;
+
+  return (
+    <div className="pdns-wrap">
+      <div className="pdns-header">
+        <div className="pdns-meta">
+          <span className="pdns-count">{records.length} records</span>
+          {circlCount > 0 && <span className="pdns-source-badge pdns-source-circl">CIRCL {circlCount}</span>}
+          {farsightCount > 0 && <span className="pdns-source-badge pdns-source-farsight">Farsight {farsightCount}</span>}
+        </div>
+        <input
+          className="pdns-filter"
+          placeholder="Filter records…"
+          value={filter}
+          onChange={e => setFilter(e.target.value)}
+        />
+      </div>
+      <div className="pdns-table-wrap">
+        <table className="pdns-table">
+          <thead>
+            <tr>
+              <th className="pdns-th">RRname</th>
+              <th className="pdns-th">Type</th>
+              <th className="pdns-th">RData</th>
+              <th className="pdns-th pdns-th-sort" onClick={() => toggleSort('time_first')}>
+                First seen {sortCol === 'time_first' ? (sortDir === 'desc' ? '↓' : '↑') : ''}
+              </th>
+              <th className="pdns-th pdns-th-sort" onClick={() => toggleSort('time_last')}>
+                Last seen {sortCol === 'time_last' ? (sortDir === 'desc' ? '↓' : '↑') : ''}
+              </th>
+              <th className="pdns-th pdns-th-sort" onClick={() => toggleSort('count')}>
+                Count {sortCol === 'count' ? (sortDir === 'desc' ? '↓' : '↑') : ''}
+              </th>
+              <th className="pdns-th">Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visible.map((r, i) => {
+              const pivot = pivotValue(r);
+              return (
+                <tr key={i} className="pdns-row">
+                  <td className="pdns-td pdns-mono">{r.rrname}</td>
+                  <td className="pdns-td"><span className="pdns-rrtype">{r.rrtype}</span></td>
+                  <td className="pdns-td pdns-mono">
+                    {pivot ? (
+                      <button className="pdns-pivot-btn" onClick={() => onSearch(pivot)} title="Search this value">
+                        {rdataStr(r)}
+                      </button>
+                    ) : rdataStr(r)}
+                  </td>
+                  <td className="pdns-td pdns-date">{fmt(r.time_first)}</td>
+                  <td className="pdns-td pdns-date">{fmt(r.time_last)}</td>
+                  <td className="pdns-td pdns-count-cell">{r.count ?? '—'}</td>
+                  <td className="pdns-td">
+                    <span className={`pdns-source-badge pdns-source-${r.source}`}>{r.source === 'circl' ? 'CIRCL' : 'Farsight'}</span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 function VtRelationsPanel({ relations, loading, onSearch }: {
   relations: VtRelations | null;
   loading: boolean;
@@ -1181,9 +1308,11 @@ export default function App() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const historyRef = useRef<HistoryEntry[]>([]);
   const [validations, setValidations] = useState<Record<string, KeyValidation>>({});
-  const [resultsTab, setResultsTab] = useState<'results' | 'relations' | 'detections'>('results');
+  const [resultsTab, setResultsTab] = useState<'results' | 'relations' | 'detections' | 'pdns'>('results');
   const [relations, setRelations] = useState<VtRelations | null>(null);
   const [relationsLoading, setRelationsLoading] = useState(false);
+  const [pdnsRecords, setPdnsRecords] = useState<PdnsRecord[]>([]);
+  const [pdnsLoading, setPdnsLoading] = useState(false);
   const [lastQuery, setLastQuery] = useState<string>('');
   const [showKeys, setShowKeys]   = useState(false);
   const [showFeeds, setShowFeeds] = useState(false);
@@ -1231,6 +1360,94 @@ export default function App() {
   function handlePrefsChange(next: RoutingPrefs) {
     setPrefs(next);
     void saveRoutingPrefs(next);
+  }
+
+  async function fetchPdns(query: string, artifactType: ArtifactType, k: Record<string, ProviderKey>): Promise<PdnsRecord[]> {
+    const results: PdnsRecord[] = [];
+
+    // ── CIRCL pDNS ─────────────────────────────────────────────────
+    const circlKey = getActiveKey(k, 'circl');
+    if (circlKey) {
+      try {
+        const base = isDev() ? '/circl-pdns-proxy' : 'https://www.circl.lu';
+        const endpoint = artifactType === 'ip'
+          ? `${base}/pdns/query/rdata/ip/${encodeURIComponent(query)}`
+          : `${base}/pdns/query/${encodeURIComponent(query)}`;
+        const [user, pass] = circlKey.split(':');
+        const r = await fetch(endpoint, {
+          headers: {
+            'Authorization': `Basic ${btoa(`${user ?? ''}:${pass ?? ''}`)}`,
+            'Accept': 'application/json',
+          },
+          signal: AbortSignal.timeout(15000),
+        });
+        if (r.ok) {
+          const text = await r.text();
+          // CIRCL returns newline-delimited JSON
+          const lines = text.trim().split('\n').filter(Boolean);
+          for (const line of lines) {
+            try {
+              const obj = JSON.parse(line) as Record<string, unknown>;
+              results.push({
+                rrname:     String(obj.rrname ?? '').replace(/\.$/, ''),
+                rrtype:     String(obj.rrtype ?? 'A'),
+                rdata:      Array.isArray(obj.rdata)
+                  ? (obj.rdata as unknown[]).map(v => String(v).replace(/\.$/, ''))
+                  : String(obj.rdata ?? '').replace(/\.$/, ''),
+                time_first: typeof obj.time_first === 'number' ? obj.time_first : null,
+                time_last:  typeof obj.time_last  === 'number' ? obj.time_last  : null,
+                count:      typeof obj.count === 'number' ? obj.count : undefined,
+                source:     'circl',
+              });
+            } catch { /* skip malformed line */ }
+          }
+        }
+      } catch { /* best-effort */ }
+    }
+
+    // ── Farsight DNSDB ─────────────────────────────────────────────
+    const farsightKey = getActiveKey(k, 'farsight');
+    if (farsightKey) {
+      try {
+        const base = isDev() ? '/farsight-proxy' : 'https://api.dnsdb.info';
+        const endpoint = artifactType === 'ip'
+          ? `${base}/dnsdb/v2/lookup/rdata/ip/${encodeURIComponent(query)}?limit=500`
+          : `${base}/dnsdb/v2/lookup/rrset/name/${encodeURIComponent(query)}?limit=500`;
+        const r = await fetch(endpoint, {
+          headers: {
+            'X-API-Key': farsightKey,
+            'Accept': 'application/x-ndjson',
+          },
+          signal: AbortSignal.timeout(15000),
+        });
+        if (r.ok) {
+          const text = await r.text();
+          const lines = text.trim().split('\n').filter(Boolean);
+          for (const line of lines) {
+            try {
+              const obj = JSON.parse(line) as Record<string, unknown>;
+              // Farsight wraps records in an "obj" key for v2
+              const rec = (obj.obj ?? obj) as Record<string, unknown>;
+              if (!rec.rrname) continue;
+              results.push({
+                rrname:     String(rec.rrname ?? '').replace(/\.$/, ''),
+                rrtype:     String(rec.rrtype ?? 'A'),
+                rdata:      Array.isArray(rec.rdata)
+                  ? (rec.rdata as unknown[]).map(v => String(v).replace(/\.$/, ''))
+                  : String(rec.rdata ?? '').replace(/\.$/, ''),
+                time_first: typeof rec.time_first === 'number' ? rec.time_first : null,
+                time_last:  typeof rec.time_last  === 'number' ? rec.time_last  : null,
+                count:      typeof rec.count === 'number' ? rec.count : undefined,
+                source:     'farsight',
+              });
+            } catch { /* skip malformed line */ }
+          }
+        }
+      } catch { /* best-effort */ }
+    }
+
+    // Deduplicate: same rrname+rrtype+rdata from both sources — keep both rows (different source badge)
+    return results;
   }
 
   async function fetchRelations(query: string, artifactType: ArtifactType, k: Record<string, ProviderKey>): Promise<VtRelations> {
@@ -1459,6 +1676,7 @@ export default function App() {
       setPanels(cached.panels);
       setLastArtifact(cached.artifactType);
       setRelations(null);
+      setPdnsRecords([]);
       setResultsTab('results');
       setLastQuery(query);
       setFeedMatches([]);
@@ -1476,6 +1694,7 @@ export default function App() {
     setPanels(null);
     setQueryResults([]);
     setRelations(null);
+    setPdnsRecords([]);
     setResultsTab('results');
     setLastQuery(query);
     setFeedMatches([]);
@@ -1662,7 +1881,10 @@ export default function App() {
             const hasRelationsProvider = ['virustotal','otx','pulsedive','recordedfuture'].some(id => !!getActiveKey(keys, id));
             const showRelations = hasRelationsProvider && ['ip','domain','url','hash'].includes(lastArtifact);
             const showDetections = (['ip','domain','url','hash','cve'] as ArtifactType[]).includes(lastArtifact) && (detectionRulesLoading || detectionRules.length > 0);
-            if (!showRelations && !showDetections) return null;
+            const showPdns = ['ip','domain'].includes(lastArtifact) && (
+              !!getActiveKey(keys, 'circl') || !!getActiveKey(keys, 'farsight')
+            );
+            if (!showRelations && !showDetections && !showPdns) return null;
             const loadRelations = async () => {
               if (relations || relationsLoading) return;
               setRelationsLoading(true);
@@ -1670,12 +1892,25 @@ export default function App() {
               setRelations(r);
               setRelationsLoading(false);
             };
+            const loadPdns = async () => {
+              if (pdnsRecords.length > 0 || pdnsLoading) return;
+              setPdnsLoading(true);
+              const recs = await fetchPdns(lastQuery, lastArtifact!, keys);
+              setPdnsRecords(recs);
+              setPdnsLoading(false);
+            };
             return (
               <div className="results-view-tabs">
                 <button
                   className={`results-view-tab ${resultsTab === 'results' ? 'active' : ''}`}
                   onClick={() => setResultsTab('results')}
                 >Results</button>
+                {showPdns && (
+                  <button
+                    className={`results-view-tab ${resultsTab === 'pdns' ? 'active' : ''}`}
+                    onClick={() => { setResultsTab('pdns'); void loadPdns(); }}
+                  >Passive DNS</button>
+                )}
                 {showRelations && (
                   <button
                     className={`results-view-tab ${resultsTab === 'relations' ? 'active' : ''}`}
@@ -1691,6 +1926,12 @@ export default function App() {
               </div>
             );
           })()}
+
+          {searchMode === 'search' && panels && lastArtifact && resultsTab === 'pdns' && (
+            <div className="relations-scroll-wrap">
+              <PdnsPanel records={pdnsRecords} loading={pdnsLoading} query={lastQuery} artifactType={lastArtifact} onSearch={q => { setSearchValue(q); handleSearch(q); }} />
+            </div>
+          )}
 
           {searchMode === 'search' && panels && lastArtifact && resultsTab === 'relations' && (
             <div className="relations-scroll-wrap">

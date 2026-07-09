@@ -116,6 +116,8 @@ export default defineConfig({
       '/pulsedive-proxy':  { target: 'https://pulsedive.com',            changeOrigin: true, rewrite: p => p.replace(/^\/pulsedive-proxy/, '') },
       '/rf-proxy':         { target: 'https://api.recordedfuture.com',   changeOrigin: true, rewrite: p => p.replace(/^\/rf-proxy/, '') },
       '/mitre-proxy':      { target: 'https://attack-taxii.mitre.org',   changeOrigin: true, rewrite: p => p.replace(/^\/mitre-proxy/, '') },
+      '/circl-pdns-proxy': { target: 'https://www.circl.lu',             changeOrigin: true, rewrite: p => p.replace(/^\/circl-pdns-proxy/, '') },
+      '/farsight-proxy':   { target: 'https://api.dnsdb.info',           changeOrigin: true, rewrite: p => p.replace(/^\/farsight-proxy/, '') },
       // Threat feed sources
       '/feed-proxy/feodotracker':  { target: 'https://feodotracker.abuse.ch',                       changeOrigin: true, rewrite: p => p.replace(/^\/feed-proxy\/feodotracker/, '') },
       '/feed-proxy/threatfox':     { target: 'https://threatfox.abuse.ch',                          changeOrigin: true, rewrite: p => p.replace(/^\/feed-proxy\/threatfox/, '') },

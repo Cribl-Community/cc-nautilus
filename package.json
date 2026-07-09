@@ -32,6 +32,7 @@
   },
   "displayName": "Nautilus",
   "description": "CTI Artifact Search",
+  "license": "Apache-2.0",
   "author": "jbrunvoll@cribl.io",
   "cribl": {
     "type": "app",

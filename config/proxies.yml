@@ -11,6 +11,24 @@ cve.circl.lu:
     allowlist:
       - /api/
 
+www.circl.lu:
+  paths:
+    allowlist:
+      - /pdns/
+  headers:
+    allowlist:
+      - authorization
+      - accept
+
+api.dnsdb.info:
+  paths:
+    allowlist:
+      - /dnsdb/v2/
+  headers:
+    allowlist:
+      - x-api-key
+      - accept
+
 services.nvd.nist.gov:
   paths:
     allowlist:

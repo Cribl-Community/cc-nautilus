@@ -395,6 +395,32 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 .vt-relation-verdict.mal { background: rgba(220,50,50,0.15); color: #e05; }
 .vt-relation-verdict.clean { background: rgba(80,180,80,0.15); color: #5b5; }
 
+/* ── Passive DNS panel ── */
+.pdns-empty { font-size: 12px; color: var(--text2); padding: 12px 0; font-style: italic; }
+.pdns-wrap { display: flex; flex-direction: column; gap: 10px; padding-bottom: 16px; }
+.pdns-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.pdns-meta { display: flex; align-items: center; gap: 8px; }
+.pdns-count { font-size: 12px; color: var(--text2); }
+.pdns-source-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px; letter-spacing: 0.03em; }
+.pdns-source-circl    { background: rgba(88,166,255,0.12); color: #58a6ff; border: 1px solid rgba(88,166,255,0.25); }
+.pdns-source-farsight { background: rgba(63,185,80,0.12);  color: #3fb950; border: 1px solid rgba(63,185,80,0.25); }
+.pdns-filter { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 12px; padding: 4px 10px; width: 220px; }
+.pdns-filter:focus { outline: none; border-color: var(--accent); }
+.pdns-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+.pdns-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.pdns-th { text-align: left; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text2); padding: 7px 12px; border-bottom: 1px solid var(--border); background: var(--bg2); white-space: nowrap; }
+.pdns-th-sort { cursor: pointer; user-select: none; }
+.pdns-th-sort:hover { color: var(--text); }
+.pdns-row:hover { background: var(--bg2); }
+.pdns-row:not(:last-child) td { border-bottom: 1px solid var(--border); }
+.pdns-td { padding: 6px 12px; vertical-align: middle; color: var(--text); }
+.pdns-mono { font-family: var(--mono); font-size: 11px; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pdns-date { color: var(--text2); white-space: nowrap; }
+.pdns-count-cell { color: var(--text2); text-align: right; }
+.pdns-rrtype { font-size: 10px; font-weight: 600; background: var(--bg3); color: var(--text2); padding: 2px 6px; border-radius: 4px; font-family: var(--mono); }
+.pdns-pivot-btn { background: none; border: none; cursor: pointer; color: var(--accent); font-family: var(--mono); font-size: 11px; padding: 0; text-align: left; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+.pdns-pivot-btn:hover { text-decoration: underline; }
+
 .panels-threat-group {
   display: flex;
   flex-direction: column;
