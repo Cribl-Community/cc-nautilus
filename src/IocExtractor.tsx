@@ -7,6 +7,34 @@ interface ExtractedIoc {
   checked: boolean;
 }
 
+// ── URL detection & page fetching ───────────────────────────────────
+
+const URL_LINE_RE = /^https?:\/\/[^\s]+$/;
+
+function looksLikeUrl(input: string): boolean {
+  const trimmed = input.trim();
+  const lines = trimmed.split('\n').map(l => l.trim()).filter(Boolean);
+  return lines.length === 1 && URL_LINE_RE.test(lines[0]);
+}
+
+async function fetchPageText(url: string): Promise<string> {
+  const readerUrl = `https://r.jina.ai/${url}`;
+  const resp = await fetch(readerUrl, {
+    headers: {
+      'Accept': 'text/plain',
+      'X-Return-Format': 'text',
+    },
+  });
+  if (!resp.ok) {
+    throw new Error(`Failed to fetch page (${resp.status}). The URL may be unreachable or blocking extraction.`);
+  }
+  const text = await resp.text();
+  if (!text.trim()) {
+    throw new Error('Page returned no extractable content.');
+  }
+  return text;
+}
+
 // ── Defanging ────────────────────────────────────────────────────────
 
 function defang(text: string): string {
@@ -143,17 +171,42 @@ export default function IocExtractor({ onBulkSearch, onSingleSearch }: IocExtrac
   const [inputText, setInputText] = useState('');
   const [iocs, setIocs] = useState<ExtractedIoc[]>([]);
   const [extracted, setExtracted] = useState(false);
+  const [fetching, setFetching] = useState(false);
+  const [fetchError, setFetchError] = useState('');
+  const [fetchedUrl, setFetchedUrl] = useState('');
 
-  function handleExtract() {
-    const found = extractIocs(inputText);
-    setIocs(found);
-    setExtracted(true);
+  async function handleExtract() {
+    setFetchError('');
+    const trimmed = inputText.trim();
+
+    if (looksLikeUrl(trimmed)) {
+      setFetching(true);
+      try {
+        const pageText = await fetchPageText(trimmed);
+        const found = extractIocs(pageText);
+        setIocs(found);
+        setExtracted(true);
+        setFetchedUrl(trimmed);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Failed to fetch page';
+        setFetchError(msg);
+      } finally {
+        setFetching(false);
+      }
+    } else {
+      const found = extractIocs(trimmed);
+      setIocs(found);
+      setExtracted(true);
+      setFetchedUrl('');
+    }
   }
 
   function handleClear() {
     setInputText('');
     setIocs([]);
     setExtracted(false);
+    setFetchError('');
+    setFetchedUrl('');
   }
 
   function toggleCheck(value: string) {
@@ -178,17 +231,20 @@ export default function IocExtractor({ onBulkSearch, onSingleSearch }: IocExtrac
     <div className="ioc-inline">
         <div className="ioc-layout">
           <div className="ioc-input-pane">
-            <div className="ioc-input-label">Paste raw text, reports, or log snippets</div>
+            <div className="ioc-input-label">Paste raw text, a report URL, or log snippets</div>
             <textarea
               className="ioc-textarea"
               value={inputText}
               onChange={e => setInputText(e.target.value)}
-              placeholder="Paste text containing IPs, domains, URLs, hashes, CVEs..."
+              placeholder={"Paste text containing IPs, domains, URLs, hashes, CVEs...\n\nOr paste a single URL to a report/blog to fetch and extract IOCs from it."}
               spellCheck={false}
             />
+            {fetchError && (
+              <div className="ioc-fetch-error">{fetchError}</div>
+            )}
             <div className="ioc-input-actions">
-              <button className="ioc-extract-btn" onClick={handleExtract} disabled={!inputText.trim()}>
-                Extract IOCs
+              <button className="ioc-extract-btn" onClick={handleExtract} disabled={!inputText.trim() || fetching}>
+                {fetching ? 'Fetching page...' : looksLikeUrl(inputText.trim()) ? 'Fetch & Extract' : 'Extract IOCs'}
               </button>
               <button className="ioc-clear-btn" onClick={handleClear}>
                 Clear
@@ -211,7 +267,10 @@ export default function IocExtractor({ onBulkSearch, onSingleSearch }: IocExtrac
             {extracted && iocs.length > 0 && (
               <>
                 <div className="ioc-results-toolbar">
-                  <span className="ioc-total-count">{iocs.length} IOC{iocs.length !== 1 ? 's' : ''} found</span>
+                  <span className="ioc-total-count">
+                    {iocs.length} IOC{iocs.length !== 1 ? 's' : ''} found
+                    {fetchedUrl && <span className="ioc-source-badge" title={fetchedUrl}> from URL</span>}
+                  </span>
                   {checkedCount > 0 && (
                     <button className="ioc-bulk-btn" onClick={handleSearchSelected}>
                       Search {checkedCount} selected in bulk

@@ -2113,6 +2113,23 @@ button.tag-chip-pivot:hover {
   cursor: pointer;
   white-space: nowrap;
 }
+.ioc-fetch-error {
+  font-size: 11px;
+  color: #d4380d;
+  background: rgba(212, 56, 13, 0.08);
+  border: 1px solid rgba(212, 56, 13, 0.2);
+  border-radius: 4px;
+  padding: 6px 8px;
+}
+.ioc-source-badge {
+  font-size: 10px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+  margin-left: 6px;
+  color: var(--accent);
+}
 .ioc-single-search-btn:hover { background: var(--bg3); }
 
 /* ── Bulk Search ────────────────────────────────────────────────────── */

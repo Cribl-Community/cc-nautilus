@@ -153,20 +153,6 @@ malshare.com:
     allowlist:
       - /api.php
 
-a.tile.openstreetmap.org:
-  paths:
-    allowlist:
-      - /
-
-b.tile.openstreetmap.org:
-  paths:
-    allowlist:
-      - /
-
-c.tile.openstreetmap.org:
-  paths:
-    allowlist:
-      - /
 
 otx.alienvault.com:
   paths:
@@ -341,3 +327,13 @@ yaraify-api.abuse.ch:
   paths:
     allowlist:
       - /api/
+
+# ── Content extraction (IOC Extractor URL fetch) ─────────────────────
+# Jina Reader: pass any URL as the path to get clean text back.
+# Usage: fetch('https://r.jina.ai/https://example.com/report')
+
+r.jina.ai:
+  timeout: 30000
+  paths:
+    allowlist:
+      - /
