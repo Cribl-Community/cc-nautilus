@@ -14,6 +14,7 @@ import { FindInLogs, CopyForAI } from './CriblPanel';
 import ThreatFeeds from './ThreatFeeds';
 import IocExtractor from './IocExtractor';
 import BulkSearch from './BulkSearch';
+import DatasetExplorer from './DatasetExplorer';
 import type { FeedMatch } from './feedTypes';
 import { loadFeeds, checkFeedMatches } from './feedService';
 import type { MitreOverlayResult } from './mitreOverlay';
@@ -1318,7 +1319,7 @@ export default function App() {
   const [showFeeds, setShowFeeds] = useState(false);
   const [feedMatches, setFeedMatches] = useState<FeedMatch[]>([]);
   const feedsRef = useRef<import('./feedTypes').FeedConfig[]>([]);
-  const [searchMode, setSearchMode] = useState<'search' | 'extract' | 'bulk'>('search');
+  const [searchMode, setSearchMode] = useState<'search' | 'extract' | 'bulk' | 'dataset'>('search');
   const [bulkInitialIndicators, setBulkInitialIndicators] = useState<string[]>([]);
   const [mitreOverlay, setMitreOverlay] = useState<MitreOverlayResult[]>([]);
   const [detectionRules, setDetectionRules] = useState<DetectionRule[]>([]);
@@ -1797,6 +1798,7 @@ export default function App() {
               <button className={`search-mode-btn${searchMode === 'search'  ? ' active' : ''}`} onClick={() => setSearchMode('search')}>Search</button>
               <button className={`search-mode-btn${searchMode === 'extract' ? ' active' : ''}`} onClick={() => setSearchMode('extract')}>Extract IOCs</button>
               <button className={`search-mode-btn${searchMode === 'bulk'    ? ' active' : ''}`} onClick={() => setSearchMode('bulk')}>Bulk Search</button>
+              <button className={`search-mode-btn${searchMode === 'dataset' ? ' active' : ''}`} onClick={() => setSearchMode('dataset')}>Dataset</button>
             </div>
           </div>
 
@@ -1818,6 +1820,10 @@ export default function App() {
               prefs={prefs}
               initialIndicators={bulkInitialIndicators}
             />
+          )}
+
+          {searchMode === 'dataset' && (
+            <DatasetExplorer />
           )}
 
           {searchMode === 'search' && !panels && !loading && (
