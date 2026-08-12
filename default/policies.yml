@@ -1,0 +1,17 @@
+policies:
+  # Search API (jobs, datasets)
+  - object: '/m/:gid/search/jobs'
+    actions: ['GET', 'POST']
+  - object: '/m/:gid/search/jobs/*'
+    actions: ['GET', 'DELETE']
+  - object: '/m/:gid/search/datasets'
+    actions: ['GET']
+  - object: '/m/:gid/search/dataset-providers'
+    actions: ['GET']
+  - object: '/m/:gid/search/usageGroups'
+    actions: ['GET']
+  # Lookups (blocklist)
+  - object: '/system/lookups'
+    actions: ['GET', 'POST']
+  - object: '/system/lookups/*'
+    actions: ['GET', 'PUT', 'PATCH']

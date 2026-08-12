@@ -151,8 +151,11 @@ export async function runCriblSearch(
     const msg = await createRes.text().catch(() => `HTTP ${createRes.status}`);
     throw new Error(msg);
   }
-  const job = await createRes.json() as { id: string };
-  const jobId = job.id;
+  const jobBody = await createRes.json() as Record<string, unknown>;
+  const jobId = (jobBody.id ?? (jobBody as { items?: Array<{ id?: string }> }).items?.[0]?.id ?? (jobBody as { jobId?: string }).jobId) as string | undefined;
+  if (!jobId) {
+    throw new Error(`Search job created but no job ID returned: ${JSON.stringify(jobBody).slice(0, 200)}`);
+  }
 
   // Poll until complete (max 30s). Use results-poll which returns as soon as data is available.
   const deadline = Date.now() + 30_000;

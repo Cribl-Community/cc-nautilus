@@ -82,6 +82,11 @@ export async function createAppPack(dev = false) {
     await cp(proxiesPath, join(buildDir, 'default', 'proxies.yml'));
   }
 
+  const policiesPath = join(rootDir, 'config', 'policies.yml');
+  if (await pathExists(policiesPath)) {
+    await cp(policiesPath, join(buildDir, 'default', 'policies.yml'));
+  }
+
   const rootPackageJson = JSON.parse(
     await readFile(join(rootDir, 'package.json'), 'utf8')
   );
