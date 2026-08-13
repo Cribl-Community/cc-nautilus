@@ -87,6 +87,11 @@ export async function createAppPack(dev = false) {
     await cp(policiesPath, join(buildDir, 'default', 'policies.yml'));
   }
 
+  const readmePath = join(rootDir, 'README.md');
+  if (await pathExists(readmePath)) {
+    await cp(readmePath, join(buildDir, 'README.md'));
+  }
+
   const rootPackageJson = JSON.parse(
     await readFile(join(rootDir, 'package.json'), 'utf8')
   );
