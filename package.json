@@ -1,7 +1,7 @@
 {
   "name": "cc-nautilus",
   "private": true,
-  "version": "0.0.4",
+  "version": "0.1.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -37,5 +37,19 @@
   "cribl": {
     "type": "app",
     "createAppScriptVersion": "0.1.0"
+  },
+  "assets": {
+    "productTypes": [
+      "lake",
+      "search",
+      "stream"
+    ]
+  },
+  "tags": {
+    "product": [
+      "lake",
+      "search",
+      "stream"
+    ]
   }
 }
