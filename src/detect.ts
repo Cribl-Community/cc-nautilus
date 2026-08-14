@@ -11,7 +11,7 @@ const FILE_EXTENSIONS = new Set([
   'apk','ipa','msi','deb','rpm',
   'elf','so','dylib','sys','drv',
   'lnk','url','scr','cpl','ocx',
-  'cfg','conf','ini','log','tmp','bak',
+  'cfg','conf','ini','log','tmp','bak','dat',
   'sql','db','sqlite','mdb',
   'csv','tsv','xml','json','yaml','yml','toml',
   'html','htm','css','scss','sass',

@@ -68,7 +68,7 @@ const FILE_EXTS_SET = new Set([
   'exe','dll','bat','sh','py','rb','pl','php','js','ts','jsx','tsx',
   'doc','docx','xls','xlsx','ppt','pptx','pdf','rtf',
   'zip','gz','tar','rar','7z','iso',
-  'cfg','conf','ini','log','tmp','bak',
+  'cfg','conf','ini','log','tmp','bak','dat',
   'xml','json','yaml','yml','md','csv','tsv','html','htm','css',
   'c','h','cpp','cs','go','rs','java',
   'png','jpg','jpeg','gif','bmp','svg','ico',
